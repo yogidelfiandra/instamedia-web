@@ -6,7 +6,19 @@ module.exports = {
     './components/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: {
+          DEFAULT: '#FB8500',
+        },
+        secondary: {
+          DEFAULT: '#CACACA',
+        },
+      },
+      animation: {
+        'spin-slow': 'spin 3s linear infinite',
+      },
+    },
   },
   plugins: [],
 };
