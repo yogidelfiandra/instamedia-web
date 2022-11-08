@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import { useCookies } from 'react-cookie';
+import Loading from '../components/Loading';
 import Logo from '../components/Logo';
 
 function Login() {
@@ -28,6 +29,7 @@ function Login() {
   });
 
   const [isShowPassword, setIsShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onChangeEmailInput = (e) => {
     const emailInput = e.target.value;
@@ -93,6 +95,10 @@ function Login() {
     e.preventDefault();
 
     try {
+      // set loading active
+      setIsSubmitting(true);
+
+      // call login API
       const result = await axios.post(
         process.env.instamedia_api_url + 'auth/login',
         {
@@ -102,6 +108,9 @@ function Login() {
       );
 
       if (result.data.status === 'success') {
+        // set loading unactive
+        setIsSubmitting(false);
+
         // share token to redux state
         const token = result.data.data.token;
 
@@ -111,28 +120,33 @@ function Login() {
         router.push('/');
       }
     } catch (error) {
+      // set loading unactive
+      setIsSubmitting(false);
+
       const responseData = error.response.data;
-      const error_validation = responseData.data.error_validation;
 
-      error_validation.map((err) => {
-        if (err.param === emailField.key) {
-          setEmailField({
-            isError: true,
-            message: err.msg,
-            value: emailField.value,
-            key: emailField.key,
-          });
-        }
+      if (responseData.status !== 'success') {
+        const error_validation = responseData.data.error_validation;
 
-        if (err.param === passwordField.key) {
-          setPasswordField({
-            isError: true,
-            message: err.msg,
-            value: passwordField.value,
-            key: passwordField.key,
-          });
-        }
-      });
+        error_validation.map((err) => {
+          if (err.param === emailField.key) {
+            setEmailField({
+              isError: true,
+              message: responseData.data.message,
+              value: emailField.value,
+              key: emailField.key,
+            });
+          }
+          if (err.param === passwordField.key) {
+            setPasswordField({
+              isError: true,
+              message: responseData.data.message,
+              value: passwordField.value,
+              key: passwordField.key,
+            });
+          }
+        });
+      }
     }
   };
 
@@ -208,13 +222,14 @@ function Login() {
             </div>
             <div className='flex items-center gap-1.5'>
               <p className='text-sm'>Remember Me</p>
-              <input type='checkbox' name='' id='' className='w-4 h-4' />
+              <input type='checkbox' className='w-4 h-4' />
             </div>
-            <input
+            <button
               type='submit'
-              value='Login'
-              className='py-2.5 px-5 rounded-lg bg-primary hover:bg-orange-500 transition-all duration-500 w-full mt-4 font-bold text-base cursor-pointer text-white'
-            />
+              className='flex place-content-center py-2.5 px-5 rounded-lg bg-primary hover:bg-orange-500 transition-all duration-500 w-full mt-4 font-bold text-base cursor-pointer text-white'
+            >
+              {isSubmitting ? <Loading /> : <div>Login</div>}
+            </button>
           </form>
           <p className='mt-4 text-sm'>
             Don’t have an account?{' '}

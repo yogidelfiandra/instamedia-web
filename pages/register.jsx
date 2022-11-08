@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
+import Loading from '../components/Loading';
 import Logo from '../components/Logo';
 
 function Register() {
@@ -18,6 +19,13 @@ function Register() {
     message: '',
     value: '',
     key: 'profile_picture',
+  });
+
+  const [fullnameField, setFullnameField] = useState({
+    isError: true,
+    message: '',
+    value: '',
+    key: 'name',
   });
 
   const [usernameField, setUsernameField] = useState({
@@ -50,6 +58,7 @@ function Register() {
 
   const [isShowPassword, setIsShowPassword] = useState(false);
   const [isShowConfirmPassword, setIsShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (!profilPictureField.value) {
@@ -81,6 +90,26 @@ function Register() {
         message: 'The profile photo is required',
         value: profilePictureInput,
         key: 'profile_picture',
+      });
+    }
+  };
+
+  const onChangeFullnameInput = (e) => {
+    const fullnameInput = e.target.value;
+
+    if (fullnameInput !== '') {
+      setFullnameField({
+        isError: false,
+        message: '',
+        value: fullnameInput,
+        key: 'name',
+      });
+    } else {
+      setFullnameField({
+        isError: true,
+        message: 'The name is required',
+        value: fullnameInput,
+        key: 'name',
       });
     }
   };
@@ -196,9 +225,13 @@ function Register() {
     e.preventDefault();
 
     try {
+      // Set Loading Active
+      setIsSubmitting(true);
+
       const payload = new FormData();
 
       payload.append(profilPictureField.key, profilPictureField.value);
+      payload.append(fullnameField.key, fullnameField.value);
       payload.append(usernameField.key, usernameField.value);
       payload.append(emailField.key, emailField.value);
       payload.append(passwordField.key, passwordField.value);
@@ -209,9 +242,15 @@ function Register() {
       );
 
       if (result.data.status === 'success') {
+        // Set Loading Unactive
+        setIsSubmitting(false);
+
         router.push('/login');
       }
     } catch (error) {
+      // Set Loading Unactive
+      setIsSubmitting(false);
+
       const responseData = error.response.data;
       const error_validation = responseData.data.error_validation;
 
@@ -219,16 +258,25 @@ function Register() {
         if (err.param === profilPictureField.key) {
           setProfilPictureField({
             isError: true,
-            message: err.msg,
+            message: responseData.data.message,
             value: profilPictureField.value,
             key: profilPictureField.key,
+          });
+        }
+
+        if (err.param === fullnameField.key) {
+          setFullnameField({
+            isError: true,
+            message: 'fullname is required',
+            value: fullnameField.value,
+            key: fullnameField.key,
           });
         }
 
         if (err.param === usernameField.key) {
           setUsernameField({
             isError: true,
-            message: err.msg,
+            message: 'username is required',
             value: usernameField.value,
             key: usernameField.key,
           });
@@ -237,7 +285,7 @@ function Register() {
         if (err.param === emailField.key) {
           setEmailField({
             isError: true,
-            message: err.msg,
+            message: responseData.data.message,
             value: emailField.value,
             key: emailField.key,
           });
@@ -246,7 +294,7 @@ function Register() {
         if (err.param === passwordField.key) {
           setPasswordField({
             isError: true,
-            message: err.msg,
+            message: responseData.data.message,
             value: passwordField.value,
             key: passwordField.key,
           });
@@ -294,6 +342,24 @@ function Register() {
               {profilPictureField.isError && (
                 <p className='text-red-600 text-xs mt-1'>
                   {profilPictureField.message}
+                </p>
+              )}
+            </div>
+            <div className='flex flex-col mb-4'>
+              <label htmlFor='fullname' className='font-normal text-base mb-2'>
+                Fullname
+              </label>
+              <input
+                type='text'
+                name='fullname'
+                id='fullname'
+                placeholder='Enter your fullname'
+                className='py-2.5 px-5 rounded-lg border-secondary border-2 placeholder:text-secondary focus:border-primary focus:outline-none focus:border-2'
+                onChange={(e) => onChangeFullnameInput(e)}
+              />{' '}
+              {fullnameField.isError && (
+                <p className='text-red-600 text-xs mt-1'>
+                  {fullnameField.message}
                 </p>
               )}
             </div>
@@ -414,11 +480,12 @@ function Register() {
                 </p>
               )}
             </div>
-            <input
+            <button
               type='submit'
-              value='Register'
-              className='py-2.5 px-5 rounded-lg bg-primary hover:bg-orange-500 transition-all duration-500 w-full mt-4 font-bold text-base cursor-pointer text-white'
-            />
+              className='flex place-content-center py-2.5 px-5 rounded-lg bg-primary hover:bg-orange-500 transition-all duration-500 w-full mt-4 font-bold text-base cursor-pointer text-white'
+            >
+              {isSubmitting ? <Loading /> : <div>Register</div>}
+            </button>
           </form>
           <p className='mt-4 text-sm'>
             Already have an account?{' '}
