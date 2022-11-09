@@ -322,7 +322,7 @@ function Register() {
                   <div>
                     <Image
                       className='rounded-full'
-                      src={previewProfilePicture}
+                      src={previewProfilePicture || ''}
                       width={100}
                       height={100}
                       alt='preview-profile-picture'

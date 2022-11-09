@@ -15,6 +15,7 @@
     "cookies": "^0.8.0",
     "eslint": "8.27.0",
     "eslint-config-next": "13.0.2",
+    "moment": "^2.29.4",
     "next": "13.0.2",
     "nextjs-progressbar": "^0.0.16",
     "prop-types": "^15.8.1",
@@ -22,7 +23,9 @@
     "react-cookie": "^4.1.1",
     "react-dom": "18.2.0",
     "react-notifications-component": "^4.0.1",
-    "react-redux": "^8.0.5"
+    "react-redux": "^8.0.5",
+    "react-responsive-carousel": "^3.2.23",
+    "universal-cookie": "^4.0.4"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.13",
